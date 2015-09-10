@@ -15,7 +15,28 @@
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vbT-il-OzV">
+                                <rect key="frame" x="200" y="250" width="200" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="QJr-a7-HAN"/>
+                                    <constraint firstAttribute="width" constant="200" id="X04-WK-qem"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <state key="normal" title="Be Metal">
+                                    <color key="titleColor" red="1" green="0.55033919438257661" blue="0.27613749747743865" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="beMetalAction:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="REk-Rm-aev"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="0.97931321186419695" green="1" blue="0.82361766104997136" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="centerY" secondItem="vbT-il-OzV" secondAttribute="centerY" id="DfS-ZJ-2dh"/>
+                            <constraint firstAttribute="centerX" secondItem="vbT-il-OzV" secondAttribute="centerX" id="obi-oC-aGr"/>
+                        </constraints>
                     </view>
                     <connections>
                         <segue destination="vrZ-uM-6tw" kind="show" identifier="goToMetal" id="pOJ-Nb-EP6"/>
@@ -24,10 +45,10 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
         </scene>
-        <!--View Controller-->
+        <!--Metal Controller-->
         <scene sceneID="AtL-JB-uUz">
             <objects>
-                <viewController id="vrZ-uM-6tw" sceneMemberID="viewController">
+                <viewController id="vrZ-uM-6tw" customClass="LHMetalController" customModule="AnimationDemo" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="C0H-pk-Wr2"/>
                         <viewControllerLayoutGuide type="bottom" id="bG6-v6-xml"/>
@@ -40,7 +61,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="opZ-2V-hmW" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1102" y="429"/>
+            <point key="canvasLocation" x="1531" y="512"/>
         </scene>
     </scenes>
 </document>
