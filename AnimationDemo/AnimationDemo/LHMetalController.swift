@@ -39,7 +39,21 @@ class LHMetalController: UIViewController {
 	// MARK: - timer logic
 	
 	func render() {
-
+		let drawable = metalLayer.nextDrawable()
+		let renderPassDescriptor = MTLRenderPassDescriptor()
+		renderPassDescriptor.colorAttachments[0].texture = drawable.texture
+		renderPassDescriptor.colorAttachments[0].loadAction = .Clear
+		renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.0, green: 104.0/255.0, blue: 5.0/255.0, alpha: 1.0)
+		let commandBuffer = commandQueue.commandBuffer()
+		let renderEncoderOpt = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
+		if let renderEncoder = renderEncoderOpt {
+			renderEncoder.setRenderPipelineState(pipelineState)
+			renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
+			renderEncoder.drawPrimitives(MTLPrimitiveType.Triangle, vertexStart: 0, vertexCount: 3, instanceCount: 1)
+			renderEncoder.endEncoding()
+		}
+		commandBuffer.presentDrawable(drawable)
+		commandBuffer.commit()
 	}
  
 	func gameloop() {
@@ -89,7 +103,7 @@ class LHMetalController: UIViewController {
 		pipelineState = device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor, error: &pipelineError)
 		
 		if pipelineState == nil {
-			println("Pipeline creation error \(pipelineError)")
+			print("Pipeline creation error \(pipelineError)")
 		}
 		
 	}
