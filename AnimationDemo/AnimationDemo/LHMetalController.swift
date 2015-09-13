@@ -13,12 +13,11 @@ import Metal
 class LHMetalController: UIViewController {
 	// MARK: - Class Properties
 
-	var device = MTLCreateSystemDefaultDevice()
+	var device = MTLCreateSystemDefaultDevice()!
 	var metalLayer = CAMetalLayer()
 	
 	var pipelineState : MTLRenderPipelineState! = nil
 	var commandQueue : MTLCommandQueue! = nil
-	var vertexBuffer : MTLBuffer! = nil
 	
 	var timer :CADisplayLink! = nil
 	
@@ -39,21 +38,9 @@ class LHMetalController: UIViewController {
 	// MARK: - timer logic
 	
 	func render() {
-		let drawable = metalLayer.nextDrawable()
-		let renderPassDescriptor = MTLRenderPassDescriptor()
-		renderPassDescriptor.colorAttachments[0].texture = drawable.texture
-		renderPassDescriptor.colorAttachments[0].loadAction = .Clear
-		renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.0, green: 104.0/255.0, blue: 5.0/255.0, alpha: 1.0)
-		let commandBuffer = commandQueue.commandBuffer()
-		let renderEncoderOpt = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
-		if let renderEncoder = renderEncoderOpt {
-			renderEncoder.setRenderPipelineState(pipelineState)
-			renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
-			renderEncoder.drawPrimitives(MTLPrimitiveType.Triangle, vertexStart: 0, vertexCount: 3, instanceCount: 1)
-			renderEncoder.endEncoding()
-		}
-		commandBuffer.presentDrawable(drawable)
-		commandBuffer.commit()
+		let drawable = metalLayer.nextDrawable()!
+		let nodeToDraw = LHTriangle(device: device)
+        nodeToDraw.render(commandQueue, pipelineState: pipelineState, drawable: drawable, clearColor: nil)
 	}
  
 	func gameloop() {
@@ -77,12 +64,7 @@ class LHMetalController: UIViewController {
 		metalLayer.framebufferOnly = true
 		metalLayer.frame = view.layer.bounds
 		view.layer.addSublayer(metalLayer)
-		//
-		setVertexData([0.0, 1.0, 0.0,
-					-1.0, -1.0, 0.0,
-					1.0, -1.0, 0.0])
-		//
-		
+
 		createRenderPipeline()
 		commandQueue = device.newCommandQueue()
 		setupTimer()
@@ -98,20 +80,9 @@ class LHMetalController: UIViewController {
 		pipelineStateDescriptor.fragmentFunction = fragmentProgram;
 		pipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
 		
-		var pipelineError : NSError?
+		pipelineState = try! device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor)
 		
-		pipelineState = device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor, error: &pipelineError)
 		
-		if pipelineState == nil {
-			print("Pipeline creation error \(pipelineError)")
-		}
-		
-	}
-	
-	
-	func setVertexData(newVertexData: [Float]) {
-	 let dataSize = newVertexData.count * sizeofValue(newVertexData[0]);
-		vertexBuffer = device.newBufferWithBytes(newVertexData, length: dataSize, options: nil)
 	}
 	
 }
