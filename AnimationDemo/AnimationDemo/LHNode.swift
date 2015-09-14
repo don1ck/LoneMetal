@@ -9,13 +9,44 @@
 import Foundation
 import Metal
 import QuartzCore
+import GLKit
+
+
+extension GLKMatrix4  {
+    static let elementsCount = 16
+}
+
+
 
 class LHNode: NSObject {
 	
 	let name:String
 	var vertexCount:Int
 	var vertexBuffer:MTLBuffer
+    var uniformBuffer: MTLBuffer?
 	var device: MTLDevice
+    var modelMatrix: GLKMatrix4 {
+        get {
+            var model = GLKMatrix4()
+            model = GLKMatrix4Translate(model, positionX, positionY, positionZ)
+            model = GLKMatrix4Scale(model, scale, scale, scale)
+            model = GLKMatrix4RotateX(model, rotationX)
+            model = GLKMatrix4RotateY(model, rotationY)
+            model = GLKMatrix4RotateZ(model, rotationZ)
+            return model
+        }
+    }
+    
+    //MARK: Transforms
+    var positionX:Float = 0.0
+    var positionY:Float = 0.0
+    var positionZ:Float = 0.0
+    
+    var rotationX:Float = 0.0
+    var rotationY:Float = 0.0
+    var rotationZ:Float = 0.0
+    var scale:Float     = 1.0
+    //
 	
 	init(name:String, vertices: Array<LHVertex>, device:MTLDevice) {
 		
@@ -52,6 +83,17 @@ class LHNode: NSObject {
         let renderEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
             renderEncoder.setRenderPipelineState(pipelineState)
             renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
+        // 1
+        var nodeModelMatrix = self.modelMatrix
+        // 2
+        uniformBuffer = device.newBufferWithLength(sizeof(Float) *  GLKMatrix4.elementsCount, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+        // 3
+        var bufferPointer = uniformBuffer?.contents()
+        // 4
+        memccpy(bufferPointer!, nodeModelMatrix, sizeof(Float)*GLKMatrix4.elementsCount, 1)
+        // 5
+        renderEncoder.setVertexBuffer(self.uniformBuffer, offset: 0, atIndex: 1)
+        
             renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: vertexCount/3)
             renderEncoder.endEncoding()
         
