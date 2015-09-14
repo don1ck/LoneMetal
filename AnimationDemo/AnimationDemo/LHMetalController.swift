@@ -39,7 +39,7 @@ class LHMetalController: UIViewController {
 	
 	func render() {
 		let drawable = metalLayer.nextDrawable()!
-		let nodeToDraw = LHTriangle(device: device)
+		let nodeToDraw = LHCube(device: device)
         nodeToDraw.render(commandQueue, pipelineState: pipelineState, drawable: drawable, clearColor: nil)
 	}
  
