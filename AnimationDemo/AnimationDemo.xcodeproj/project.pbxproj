@@ -407,7 +407,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.exadel.loneHouse.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "84d82fec-dfe5-4295-9f3d-78feadb37ffe";
+				PROVISIONING_PROFILE = "3179f598-d679-4e22-9717-0fe8db97e83a";
 			};
 			name = Debug;
 		};
@@ -420,7 +420,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.exadel.loneHouse.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "84d82fec-dfe5-4295-9f3d-78feadb37ffe";
+				PROVISIONING_PROFILE = "3179f598-d679-4e22-9717-0fe8db97e83a";
 			};
 			name = Release;
 		};

@@ -9,18 +9,21 @@
 import UIKit
 import QuartzCore
 import Metal
+import GLKit
 
 class LHMetalController: UIViewController {
 	// MARK: - Class Properties
 
 	var device = MTLCreateSystemDefaultDevice()!
 	var metalLayer = CAMetalLayer()
+	var projectionMatrix :GLKMatrix4!
 	
 	var pipelineState : MTLRenderPipelineState! = nil
 	var commandQueue : MTLCommandQueue! = nil
 	
 	var timer :CADisplayLink! = nil
 	
+	@IBOutlet weak var metalView: UIView!
 	// MARK: - UIView life circle
 	
     override func viewDidLoad() {
@@ -40,7 +43,14 @@ class LHMetalController: UIViewController {
 	func render() {
 		let drawable = metalLayer.nextDrawable()!
 		let nodeToDraw = LHCube(device: device)
-        nodeToDraw.render(commandQueue, pipelineState: pipelineState, drawable: drawable, clearColor: nil)
+		nodeToDraw.positionZ = -2.0
+		nodeToDraw.scale = 1
+		
+		var worldModelMatrix = GLKMatrix4Identity
+		worldModelMatrix = GLKMatrix4Translate(worldModelMatrix, 0, 0, -7)
+		worldModelMatrix = GLKMatrix4RotateX(<#T##matrix: GLKMatrix4##GLKMatrix4#>, <#T##radians: Float##Float#>)
+		
+		nodeToDraw.render(commandQueue, pipelineState: pipelineState, drawable: drawable, parentModelMatrix: worldModelMatrix, projectionMatrix: projectionMatrix, clearColor: nil)
 	}
  
 	func gameloop() {
@@ -65,6 +75,8 @@ class LHMetalController: UIViewController {
 		metalLayer.frame = view.layer.bounds
 		view.layer.addSublayer(metalLayer)
 
+		projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(85), Float(self.view.bounds.size.width / self.view.bounds.size.height), 0.01, 100.0)
+		
 		createRenderPipeline()
 		commandQueue = device.newCommandQueue()
 		setupTimer()
@@ -81,8 +93,6 @@ class LHMetalController: UIViewController {
 		pipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
 		
 		pipelineState = try! device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor)
-		
-		
 	}
 	
 }

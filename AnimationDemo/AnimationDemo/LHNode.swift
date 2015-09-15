@@ -11,12 +11,12 @@ import Metal
 import QuartzCore
 import GLKit
 
-
 extension GLKMatrix4  {
     static let elementsCount = 16
+	func raw() -> Array<Float> {
+		return [m00,m01,m02,m03,m10,m11,m12,m13,m20,m21,m22,m23,m30,m31,m32,m33]
+	}
 }
-
-
 
 class LHNode: NSObject {
 	
@@ -27,7 +27,7 @@ class LHNode: NSObject {
 	var device: MTLDevice
     var modelMatrix: GLKMatrix4 {
         get {
-            var model = GLKMatrix4()
+            var model = GLKMatrix4Identity
             model = GLKMatrix4Translate(model, positionX, positionY, positionZ)
             model = GLKMatrix4Scale(model, scale, scale, scale)
             model = GLKMatrix4RotateX(model, rotationX)
@@ -72,7 +72,7 @@ class LHNode: NSObject {
     - parameter clearColor:   
     clearColor
     */
-    func render(commandQueue: MTLCommandQueue, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, clearColor: MTLClearColor?) {
+	func render(commandQueue: MTLCommandQueue, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, parentModelMatrix:GLKMatrix4, projectionMatrix:GLKMatrix4, clearColor: MTLClearColor?) {
         let renderPassDescriptor = MTLRenderPassDescriptor()
         renderPassDescriptor.colorAttachments[0].texture = drawable.texture
         renderPassDescriptor.colorAttachments[0].loadAction = .Clear
@@ -83,18 +83,13 @@ class LHNode: NSObject {
         let renderEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
             renderEncoder.setRenderPipelineState(pipelineState)
             renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
-        // 1
+
         var nodeModelMatrix = self.modelMatrix
-        // 2
-        uniformBuffer = device.newBufferWithLength(sizeof(Float) *  GLKMatrix4.elementsCount, options: MTLResourceOptions.CPUCacheModeDefaultCache)
-        // 3
-        var bufferPointer = uniformBuffer?.contents()
-        // 4
-        memccpy(bufferPointer!, nodeModelMatrix, sizeof(Float)*GLKMatrix4.elementsCount, 1)
-        // 5
+		nodeModelMatrix = GLKMatrix4Multiply(parentModelMatrix, nodeModelMatrix)
+        uniformBuffer = device.newBufferWithBytes(nodeModelMatrix.raw()+projectionMatrix.raw(), length: sizeof(Float)*GLKMatrix4.elementsCount*2, options: MTLResourceOptions.CPUCacheModeDefaultCache)
         renderEncoder.setVertexBuffer(self.uniformBuffer, offset: 0, atIndex: 1)
         
-            renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: vertexCount/3)
+            renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: 1)
             renderEncoder.endEncoding()
         
         commandBuffer.presentDrawable(drawable)
