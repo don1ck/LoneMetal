@@ -36,5 +36,17 @@ class LHCube: LHNode {
 		
 		super.init(name: "Cube", vertices: verticesArray, device: device)
 	}
+	
+	
+	override func updateWithDelta(delta: CFTimeInterval) {
+		
+		super.updateWithDelta(delta)
+		
+		let secsPerMove: Float = 6.0
+		rotationY = sinf( Float(time) * 2.0 * Float(M_PI) / secsPerMove)
+		rotationX = sinf( Float(time) * 2.0 * Float(M_PI) / secsPerMove)
+		rotationZ = sinf( Float(time) * 2.0 * Float(M_PI) / secsPerMove)
+	}
+	
 
 }

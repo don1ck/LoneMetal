@@ -22,6 +22,9 @@ class LHMetalController: UIViewController {
 	var commandQueue : MTLCommandQueue! = nil
 	
 	var timer :CADisplayLink! = nil
+	var lastFrameTimestamp : CFTimeInterval = 0.0
+	
+	var nodeToDraw: LHNode! = nil
 	
 	@IBOutlet weak var metalView: UIView!
 	// MARK: - UIView life circle
@@ -39,23 +42,34 @@ class LHMetalController: UIViewController {
 	
 	
 	// MARK: - timer logic
-	
-	func render() {
+	func render(time:CFTimeInterval) {
 		let drawable = metalLayer.nextDrawable()!
-		let nodeToDraw = LHCube(device: device)
 		nodeToDraw.positionZ = -2.0
 		nodeToDraw.scale = 1
+		nodeToDraw.updateWithDelta(time)
 		
 		var worldModelMatrix = GLKMatrix4Identity
 		worldModelMatrix = GLKMatrix4Translate(worldModelMatrix, 0, 0, -7)
-		worldModelMatrix = GLKMatrix4RotateX(<#T##matrix: GLKMatrix4##GLKMatrix4#>, <#T##radians: Float##Float#>)
-		
+		worldModelMatrix = GLKMatrix4RotateX(worldModelMatrix, GLKMathDegreesToRadians(25))
 		nodeToDraw.render(commandQueue, pipelineState: pipelineState, drawable: drawable, parentModelMatrix: worldModelMatrix, projectionMatrix: projectionMatrix, clearColor: nil)
 	}
  
-	func gameloop() {
+	func newFrame(displayLink: CADisplayLink) {
+		
+		if lastFrameTimestamp == 0.0 {
+			lastFrameTimestamp = displayLink.timestamp
+		}
+		
+		let elapsed:CFTimeInterval = displayLink.timestamp - lastFrameTimestamp
+		lastFrameTimestamp = displayLink.timestamp
+		
+		gameloop(timeSinceLastUpdate: elapsed)
+		
+	}
+ 
+	func gameloop(timeSinceLastUpdate timeSinceLastUpdate: CFTimeInterval) {
 		autoreleasepool {
-			self.render()
+			self.render(timeSinceLastUpdate)
 		}
 	}
 	
@@ -63,12 +77,12 @@ class LHMetalController: UIViewController {
 	// MARK: - Custom methods
 	
 	func setupTimer() {
-		timer = CADisplayLink(target: self, selector: Selector("gameloop"))
+		timer = CADisplayLink(target: self, selector: Selector("newFrame:"))
 		timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
 	}
 	
 	func setupMetal() {
-		
+		nodeToDraw = LHCube(device: device)
 		metalLayer.device = device
 		metalLayer.pixelFormat = .BGRA8Unorm
 		metalLayer.framebufferOnly = true

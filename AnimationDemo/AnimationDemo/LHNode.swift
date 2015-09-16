@@ -36,6 +36,8 @@ class LHNode: NSObject {
             return model
         }
     }
+	
+	var time: CFTimeInterval = 0.0
     
     //MARK: Transforms
     var positionX:Float = 0.0
@@ -62,6 +64,10 @@ class LHNode: NSObject {
 		self.device = device
 		self.vertexCount = vertices.count
 	}
+	
+	func updateWithDelta(delta: CFTimeInterval){
+		time += delta
+	}
     
     /**
     Renders Node
@@ -81,6 +87,7 @@ class LHNode: NSObject {
 
         let commandBuffer = commandQueue.commandBuffer()
         let renderEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)
+			renderEncoder.setCullMode(MTLCullMode.Front)
             renderEncoder.setRenderPipelineState(pipelineState)
             renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
 
